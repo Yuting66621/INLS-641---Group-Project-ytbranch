@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uber Analytics Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <h1>
+        <div class="logo-container">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="40px" height="40px">
+            <path d="M5 11h14l-1.5-4.5c-.2-.6-.8-1-1.4-1H7.9c-.7 0-1.2.4-1.4 1L5 11zm14 2H5c-.6 0-1 .4-1 1v6h2v-2h12v2h2v-6c0-.6-.4-1-1-1zm-9.5 5c-.8 0-1.5-.7-1.5-1.5S8.7 15 9.5 15s1.5.7 1.5 1.5S10.3 18 9.5 18zm5 0c-.8 0-1.5-.7-1.5-1.5S13.7 15 14.5 15s1.5.7 1.5 1.5S15.3 18 14.5 18z"/>
+          </svg>
+          <span class="uber-text">UBER</span>
+        </div>
+        <small style="font-size: 14px; font-weight: normal;">ANALYTICS DASHBOARD</small>
+      </h1>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="#" class="nav-link active" data-section="overall">Overall</a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-section="vehicle-type-page">Vehicle Type</a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-section="revenue">Revenue</a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-section="booking-status">Booking Status</a></li>
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Overall Section -->
+      <section id="overall" class="dashboard-section active">
+        <div class="content-header">
+          <h2 class="content-title">Overall Analytics</h2>
+          <p class="content-subtitle">Comprehensive overview of Uber operations</p>
+        </div>
+        <div class="date-filter-container">
+          <div class="date-filter-group">
+            <label class="date-filter-label">Start Date</label>
+            <input type="date" id="start-date-overall" class="date-filter-input">
+          </div>
+          <div class="date-filter-group">
+            <label class="date-filter-label">End Date</label>
+            <input type="date" id="end-date-overall" class="date-filter-input">
+          </div>
+          <button class="filter-button" onclick="applyDateFilter('overall')">Apply Filter</button>
+          <button class="reset-button" onclick="resetDateFilter('overall')">Reset</button>
+          <div class="filter-info" id="filter-info-overall">Showing all data</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="total-bookings">-</div>
+            <div class="stat-label">Total Bookings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="completed-rides">-</div>
+            <div class="stat-label">Completed Rides</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="avg-distance">-</div>
+            <div class="stat-label">Avg Distance (km)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="avg-rating">-</div>
+            <div class="stat-label">Average Rating</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="total-revenue">-</div>
+            <div class="stat-label">Total Revenue (₹)</div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="dashboard-card">
+            <h3 class="card-title">Bookings by Vehicle Type</h3>
+            <div id="vehicle-type-chart-overall" class="chart-container"></div>
+          </div>
+          <div class="dashboard-card">
+            <h3 class="card-title">Booking Status Distribution</h3>
+            <div id="booking-status-pie-chart" class="chart-container"></div>
+          </div>
+        </div>
+
+        <div class="dashboard-card" style="margin-top: 20px;">
+          <h3 class="card-title">Bookings Over Time</h3>
+          <div id="bookings-over-time-chart" class="chart-container" style="min-height: 400px;"></div>
+        </div>
+      </section>
+
+      <!-- Vehicle Type Page -->
+      <section id="vehicle-type-page" class="dashboard-section">
+        <div class="content-header">
+          <h2 class="content-title">Vehicle Type Analysis</h2>
+          <p class="content-subtitle">Detailed breakdown by vehicle categories</p>
+        </div>
+        <div class="date-filter-container">
+          <div class="date-filter-group">
+            <label class="date-filter-label">Start Date</label>
+            <input type="date" id="start-date-vehicle-type-page" class="date-filter-input">
+          </div>
+          <div class="date-filter-group">
+            <label class="date-filter-label">End Date</label>
+            <input type="date" id="end-date-vehicle-type-page" class="date-filter-input">
+          </div>
+          <button class="filter-button" onclick="applyDateFilter('vehicle-type-page')">Apply Filter</button>
+          <button class="reset-button" onclick="resetDateFilter('vehicle-type-page')">Reset</button>
+          <div class="filter-info" id="filter-info-vehicle-type-page">Showing all data</div>
+        </div>
+        
+        <div class="dashboard-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 class="card-title">Vehicle Type Metrics</h3>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <label style="font-weight: 600; color: #333;">Metric:</label>
+              <select id="vehicle-metric-select" class="date-filter-select" onchange="updateVehicleTypeMetricChart()">
+                <option value="totalBookingValue">Total Booking Value in Rupees (₹)</option>
+                <option value="successBookingValue">Success Booking Value in Rupees (₹)</option>
+                <option value="avgDistance">Average Distance Travelled (km)</option>
+                <option value="totalDistance">Total Distance Travelled (km)</option>
+                <option value="avgDriverRating">Average Driver Rating (Stars) </option>
+                <option value="avgCustomerRating">Average Customer Rating (Stars)</option>
+              </select>
+            </div>
+          </div>
+          <div id="vehicle-type-metric-chart" class="chart-container"></div>
+        </div>
+      </section>
+
+      <!-- Revenue Section -->
+      <section id="revenue" class="dashboard-section">
+        <div class="content-header">
+          <h2 class="content-title">Revenue Analytics</h2>
+          <p class="content-subtitle">Financial performance metrics</p>
+        </div>
+        <div class="date-filter-container">
+          <div class="date-filter-group">
+            <label class="date-filter-label">Start Date</label>
+            <input type="date" id="start-date-revenue" class="date-filter-input">
+          </div>
+          <div class="date-filter-group">
+            <label class="date-filter-label">End Date</label>
+            <input type="date" id="end-date-revenue" class="date-filter-input">
+          </div>
+          <button class="filter-button" onclick="applyDateFilter('revenue')">Apply Filter</button>
+          <button class="reset-button" onclick="resetDateFilter('revenue')">Reset</button>
+          <div class="filter-info" id="filter-info-revenue">Showing all data</div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+          <div class="dashboard-card">
+            <h3 class="card-title">Payment Methods Distribution</h3>
+            <div id="payment-methods-chart" class="chart-container"></div>
+          </div>
+          
+          <div class="dashboard-card">
+            <h3 class="card-title">Revenue by Pickup/Drop Location (Top 10)</h3>
+            <div id="revenue-location-heatmap" class="chart-container" style="min-height: 400px;"></div>
+          </div>
+        </div>
+        
+        <div class="dashboard-card">
+          <h3 class="card-title">Price per KM Distribution</h3>
+          <div id="price-per-km-chart" class="chart-container" style="min-height: 350px;"></div>
+        </div>
+      </section>
+
+      <!-- Booking Status Section -->
+      <section id="booking-status" class="dashboard-section">
+        <div class="content-header">
+          <h2 class="content-title">Booking Status Overview</h2>
+          <p class="content-subtitle">Real-time booking performance</p>
+        </div>
+        <div class="date-filter-container">
+          <div class="date-filter-group">
+            <label class="date-filter-label">Start Date</label>
+            <input type="date" id="start-date-booking-status" class="date-filter-input">
+          </div>
+          <div class="date-filter-group">
+            <label class="date-filter-label">End Date</label>
+            <input type="date" id="end-date-booking-status" class="date-filter-input">
+          </div>
+          <button class="filter-button" onclick="applyDateFilter('booking-status')">Apply Filter</button>
+          <button class="reset-button" onclick="resetDateFilter('booking-status')">Reset</button>
+          <div class="filter-info" id="filter-info-booking-status">Showing all data</div>
+        </div>
+        <div class="dashboard-grid">
+          <div class="dashboard-card">
+            <h3 class="card-title">Booking Status Summary</h3>
+            <div id="booking-status-chart" class="chart-container"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
